@@ -1,0 +1,20 @@
+RUNTIME DEPENDENCIES:
+
+	libc
+	libpassphrase
+
+
+BUILD DEPENDENCIES:
+
+	coreutils
+	make
+	c99
+	libc
+	libpassphrase
+
+
+INSTALL DEPENDENCIES:
+
+	coreutils
+	make
+
