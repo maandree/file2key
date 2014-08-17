@@ -18,6 +18,8 @@
  */
 #include "keccak.h"
 
+#include <stdlib.h>
+
 
 #define lane_t    int_fast64_t
 #define ulane_t  uint_fast64_t
@@ -56,22 +58,22 @@ static lane_t* S = NULL;
 /**
  * Left over water to fill the sponge with at next update
  */
-static int8_t* M = NULL;
+static char* M = NULL;
 
 /**
  * Pointer for {@link #M}
  */
-static long mptr = 0;
+static size_t mptr = 0;
 
 /**
  * Size of {@link #M}
  */
-static long mlen = 0;
+static size_t mlen = 0;
 
 /**
  * Hash output buffer
  */
-static int8_t* output = NULL;
+static char* output = NULL;
 
 
 
@@ -84,9 +86,9 @@ static int8_t* output = NULL;
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static inline void arraycopy(const int8_t* restrict src, long soff, int8_t* restrict dest, long doff, long length)
+static inline void arraycopy(const char* restrict src, size_t soff, char* restrict dest, size_t doff, size_t length)
 {
-  long i;
+  size_t i;
   src += soff;
   dest += doff;
   
@@ -126,7 +128,7 @@ static inline void arraycopy(const int8_t* restrict src, long soff, int8_t* rest
       if ((length &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   src += 64;  dest += 64;  }
       if ((length & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   src += 128;  dest += 128;  }
     }
-  length &= ~255;
+length &= (size_t)~255;
   for (i = 0; i < length; i += 256)
     {
       __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;  __8;   src += 256;  dest += 256;
@@ -154,11 +156,11 @@ static inline void arraycopy(const int8_t* restrict src, long soff, int8_t* rest
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static inline void revarraycopy(const int8_t* restrict src, long soff, int8_t* restrict dest, long doff, long length)
+static inline void revarraycopy(const char* restrict src, size_t soff, char* restrict dest, size_t doff, size_t length)
 {
-  long copyi;
-  for (copyi = length - 1; copyi >= 0; copyi--)
-    dest[copyi + doff] = src[copyi + soff];
+  ssize_t copyi;
+  for (copyi = (ssize_t)(length) - 1; copyi >= 0; copyi--)
+    dest[copyi + (ssize_t)doff] = src[copyi + (ssize_t)soff];
 }
 
 
@@ -167,7 +169,7 @@ static inline void revarraycopy(const int8_t* restrict src, long soff, int8_t* r
  * Rotate a 64-bit word
  * 
  * @param   X:lane_t  The value to rotate
- * @param   N:long    Rotation steps, may not be 0
+ * @param   N:size_t  Rotation steps, may not be 0
  * @return   :lane_t  The value rotated
  */
 #define rotate(X, N)  ((lane_t)((ulane_t)(X) >> (64 - (N))) + ((X) << (N)))
@@ -266,9 +268,9 @@ static void keccakF(lane_t* restrict A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static inline lane_t toLane(const int8_t* restrict message, long msglen, long off)
+static inline lane_t toLane(const char* restrict message, size_t msglen, size_t off)
 {
-  long n = msglen < 128 ? msglen : 128;
+  size_t n = msglen < 128 ? msglen : 128;
   return ((off + 7 < n) ? ((lane_t)(message[off + 7] & 255) << 56) : 0L) |
          ((off + 6 < n) ? ((lane_t)(message[off + 6] & 255) << 48) : 0L) |
          ((off + 5 < n) ? ((lane_t)(message[off + 5] & 255) << 40) : 0L) |
@@ -288,29 +290,29 @@ static inline lane_t toLane(const int8_t* restrict message, long msglen, long of
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-static inline int8_t* pad10star1(const int8_t* restrict msg, long len, long* restrict outlen)
+static inline char* pad10star1(const char* restrict msg, size_t len, size_t* restrict outlen)
 {
-  int8_t* message;
+  char* message;
   
-  long nrf = (len <<= 3) >> 3;
-  long nbrf = len & 7;
-  long ll = len & 1023;
-  long i;
+  size_t nrf = (len <<= 3) >> 3;
+  size_t nbrf = len & 7;
+  size_t ll = len & 1023;
+  size_t i;
   
-  int8_t b = (int8_t)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
+  char b = (char)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
   
   if ((1016 <= ll) && (ll <= 1022))
     {
-      message = malloc((size_t)(len = nrf + 1) * sizeof(int8_t));
-      message[nrf] = (int8_t)(b ^ 128);
+      message = malloc((size_t)(len = nrf + 1) * sizeof(char));
+      message[nrf] = (char)(b ^ 128);
     }
   else
     {
-      int8_t* m;
-      long n;
+      char* m;
+      size_t n;
       len = (nrf + 1) << 3;
       len = ((len - (len & 1023) + 1016) >> 3) + 1;
-      message = malloc((size_t)len * sizeof(int8_t));
+      message = malloc((size_t)len * sizeof(char));
       message[nrf] = b;
       n = len - nrf - 1;
       m = message + nrf + 1;
@@ -351,7 +353,7 @@ static inline int8_t* pad10star1(const int8_t* restrict msg, long len, long* res
 	  if ((n &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   m += 64;  }
 	  if ((n & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   m += 128;  }
 	}
-      n &= ~255;
+      n &= (size_t)~255;
       for (i = 0; i < n; i += 256)
 	{
 	  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;  __8;   m += 256;
@@ -382,11 +384,11 @@ static inline int8_t* pad10star1(const int8_t* restrict msg, long len, long* res
  */
 void initialise(void)
 {
-  long i;
+  size_t i;
   
-  output = malloc(72 * sizeof(int8_t));
+  output = malloc(72 * sizeof(char));
   S = malloc(25 * sizeof(lane_t));
-  M = malloc((size_t)(mlen = 409600) * sizeof(int8_t));
+  M = malloc((mlen = 409600) * sizeof(char));
   mptr = 0;
   
   for (i = 0; i < 25; i++)
@@ -409,15 +411,15 @@ void dispose(void)
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-void update(const int8_t* restrict msg, long msglen)
+void update(const char* restrict msg, size_t msglen)
 {
-  long i, len, nnn;
-  int8_t* message;
-  int8_t* _msg;
+  size_t i, len, nnn;
+  char* message;
+  char* _msg;
   
   if (mptr + msglen > mlen)
     {
-      int8_t* buf = malloc((size_t)(mlen = (mlen + msglen) << 1) * sizeof(int8_t));
+      char* buf = malloc((mlen = (mlen + msglen) << 1) * sizeof(char));
       arraycopy(M, 0, buf, 0, mptr);
       free(M);
       M = buf;
@@ -425,11 +427,14 @@ void update(const int8_t* restrict msg, long msglen)
   arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % 204800;
-  _msg = message = malloc((size_t)len * sizeof(int8_t));
+  _msg = message = malloc((size_t)len * sizeof(char));
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
   revarraycopy(M, nnn = len, M, 0, mptr);
-  
+
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wunsafe-loop-optimizations"
+
   /* Absorbing phase */
   for (i = 0; i < nnn; i += 128)
     {
@@ -444,6 +449,8 @@ void update(const int8_t* restrict msg, long msglen)
       message += 128;
       len -= 128;
     }
+
+# pragma GCC diagnostic pop
   
   free(_msg);
 }
@@ -456,12 +463,11 @@ void update(const int8_t* restrict msg, long msglen)
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-int8_t* digest(const int8_t* restrict msg, long msglen)
+char* digest(const char* restrict msg, size_t msglen)
 {
-  int8_t* message;
-  int8_t* rc;
-  int8_t* _msg;
-  long len, i, j, ptr = 0, nnn;
+  char* message;
+  char* _msg;
+  size_t len, i, j, ptr = 0, nnn;
   
   if ((msg == NULL) || (msglen == 0))
     message = pad10star1(M, mptr, &len);
@@ -469,7 +475,7 @@ int8_t* digest(const int8_t* restrict msg, long msglen)
     {
       if (mptr + msglen > mlen)
 	{
-	  int8_t* buf = malloc((size_t)(mlen += msglen) * sizeof(int8_t));
+	  char* buf = malloc((mlen += msglen) * sizeof(char));
 	  arraycopy(M, 0, buf, 0, mptr);
 	  free(M);
 	  M = buf;
@@ -481,6 +487,9 @@ int8_t* digest(const int8_t* restrict msg, long msglen)
   M = NULL;
   nnn = len;
   _msg = message;
+  
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wunsafe-loop-optimizations"
   
   /* Absorbing phase */
   for (i = 0; i < nnn; i += 128)
@@ -497,6 +506,8 @@ int8_t* digest(const int8_t* restrict msg, long msglen)
       len -= 128;
     }
   
+# pragma GCC diagnostic pop
+  
   free(_msg);
   
   /* Squeezing phase */
@@ -505,7 +516,7 @@ int8_t* digest(const int8_t* restrict msg, long msglen)
       lane_t v = S[(i % 5) * 5 + i / 5];
       for (j = 0; j < 8; j++)
 	{
-	  output[ptr++] = (int8_t)v;
+	  output[ptr++] = (char)v;
 	  v >>= 8;
 	}
     }
@@ -519,9 +530,9 @@ int8_t* digest(const int8_t* restrict msg, long msglen)
  * 
  * @return  The hash sum
  */
-int8_t* squeeze(void)
+char* squeeze(void)
 {
-  long i, j, ptr;
+  size_t i, j, ptr;
   
   keccakF(S); /* Last squeeze did not do a ending squeeze */
   
@@ -532,7 +543,7 @@ int8_t* squeeze(void)
       lane_t v = S[(i % 5) * 5 + i / 5];
       for (j = 0; j < 8; j++)
 	{
-          *(output + ptr++) = (int8_t)v;
+          *(output + ptr++) = (char)v;
 	  v >>= 8;
 	}
     }

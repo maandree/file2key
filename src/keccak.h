@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdlib.h>
+#include <stddef.h>
 #include <inttypes.h>
 
 
@@ -39,7 +39,7 @@ void dispose(void);
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-void update(const int8_t* restrict msg, long msglen);
+void update(const char* restrict msg, size_t msglen);
 
 
 /**
@@ -49,7 +49,7 @@ void update(const int8_t* restrict msg, long msglen);
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-int8_t* digest(const int8_t* restrict msg, long msglen);
+char* digest(const char* restrict msg, size_t msglen);
 
 
 /**
@@ -57,5 +57,5 @@ int8_t* digest(const int8_t* restrict msg, long msglen);
  * 
  * @return  The hash sum
  */
-int8_t* squeeze(void);
+char* squeeze(void);
 

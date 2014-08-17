@@ -1,6 +1,6 @@
 RUNTIME DEPENDENCIES:
 
-	libc
+	glibc
 	libpassphrase
 
 
@@ -8,8 +8,8 @@ BUILD DEPENDENCIES:
 
 	coreutils
 	make
-	c99
-	libc
+	gcc
+	glibc
 	libpassphrase
 
 

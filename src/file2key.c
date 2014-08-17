@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <passphrase.h>
 
@@ -33,7 +34,7 @@
  * 
  * DO NOT EDIT!
  */
-char* STATIC_SALT = "5EbppWrYxMuBKQmbDz8rOCVCONsSLas74qrjMLTiJqsYWcTePNeshVXcmAWGkh88VeFh";
+#define STATIC_SALT  "5EbppWrYxMuBKQmbDz8rOCVCONsSLas74qrjMLTiJqsYWcTePNeshVXcmAWGkh88VeFh"
 
 
 
@@ -67,8 +68,8 @@ int main(int argc, char** argv)
   FILE* file = NULL;
   char* passphrase = NULL;
   size_t passphrase_n;
-  int8_t* hash;
-  int8_t* data = NULL;
+  char* hash;
+  char* data = NULL;
   size_t ptr;
   size_t blksize;
   size_t got;
@@ -93,13 +94,13 @@ int main(int argc, char** argv)
   file = fopen(argv[1], "r");
   if (file == NULL)
     goto pfail;
-  data = malloc(attr.st_size * sizeof(int8_t));
+  data = malloc((size_t)(attr.st_size) * sizeof(char));
   if (data == NULL)
     goto pfail;
   
-  blksize = attr.st_blksize ? attr.st_blksize : (8 << 10);
+  blksize = attr.st_blksize ? (size_t)(attr.st_blksize) : (size_t)(8 << 10);
   
-  for (ptr = 0; ptr < attr.st_size; ptr += got)
+  for (ptr = 0; ptr < (size_t)(attr.st_size); ptr += got)
     {
       got = fread(data + ptr, 1, blksize, file);
       if (got < blksize)
@@ -127,9 +128,9 @@ int main(int argc, char** argv)
   passphrase_wipe(passphrase, passphrase_n);
   free(passphrase), passphrase = NULL;
   
-  for (ptr = 0; ptr < attr.st_size; ptr += 72)
+  for (ptr = 0; ptr < (size_t)(attr.st_size); ptr += 72)
     {
-      size_t i, n = attr.st_size - ptr;
+      size_t i, n = (size_t)(attr.st_size) - ptr;
       if (n > 72)
 	n = 72;
       
@@ -142,8 +143,8 @@ int main(int argc, char** argv)
 	  
 	  for (i = 0; i < 10; i++)
 	    {
-	      memcpy(phash + (i * 2 + 0) * 6, COLOUR_HEX[((uint8_t)(hash[i]) >> 4) & 15], 6 * sizeof(char));
-	      memcpy(phash + (i * 2 + 1) * 6, COLOUR_HEX[((uint8_t)(hash[i]) >> 0) & 15], 6 * sizeof(char));
+	      memcpy(phash + (i * 2 + 0) * 6, COLOUR_HEX[((unsigned char)(hash[i]) >> 4) & 15], 6 * sizeof(char));
+	      memcpy(phash + (i * 2 + 1) * 6, COLOUR_HEX[((unsigned char)(hash[i]) >> 0) & 15], 6 * sizeof(char));
 	    }
 	  phash[20 * 6] = '\0';
 	  
