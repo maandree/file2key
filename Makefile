@@ -62,6 +62,20 @@ obj/%.o: src/%.c src/*.h
 	$(CC) $(FLAGS) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 
+.PHONY: install
+install: bin/file2key
+	install -dm755 -- "$(DESTDIR)$(BINDIR)"
+	install -m755 bin/file2key -- "$(DESTDIR)$(BINDIR)/$(COMMAND)"
+	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+	install -m644 LICENSE COPYING -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+
+.PHONY: uninstall
+uninstall:
+	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
+	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
+	-rmdir -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
+	-rm -- "$(DESTDIR)$(BINDIR)/$(COMMAND)"
+
 
 .PHONY: clean
 clean:
