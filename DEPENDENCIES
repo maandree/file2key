@@ -1,7 +1,8 @@
 RUNTIME DEPENDENCIES:
 
-	glibc
+	libc
 	libpassphrase
+	libkeccak
 
 
 BUILD DEPENDENCIES:
@@ -9,8 +10,9 @@ BUILD DEPENDENCIES:
 	coreutils
 	make
 	gcc
-	glibc
+	libc
 	libpassphrase
+	libkeccak
 
 
 INSTALL DEPENDENCIES:

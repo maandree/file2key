@@ -53,13 +53,13 @@ FLAGS = $(OPTIMISE) $(WARN) -std=$(STD) \
 .PHONY: all
 all: bin/file2key
 
-bin/file2key: obj/file2key.o obj/keccak.o
+bin/file2key: obj/file2key.o
 	@mkdir -p bin
-	$(CC) $(FLAGS) $(LDFLAGS) -lpassphrase -o $@ $^
+	$(CC) $(FLAGS) -lpassphrase -lkeccak -o $@ $^ $(LDFLAGS)
 
-obj/%.o: src/%.c src/*.h
+obj/%.o: src/%.c
 	@mkdir -p obj
-	$(CC) $(FLAGS) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(CC) $(FLAGS) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 
 .PHONY: install

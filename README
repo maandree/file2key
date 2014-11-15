@@ -9,3 +9,5 @@ file2key cannot be configured. The idea behind this is that you
 if it required configurations you run the risk of losing all your
 keys if you lose your configurations. This must not happen.
 
+file2key can also be used to encrypt and decrypt files.
+
