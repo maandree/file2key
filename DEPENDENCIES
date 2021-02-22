@@ -9,7 +9,7 @@ BUILD DEPENDENCIES:
 
 	coreutils
 	make
-	gcc
+	cc
 	libc
 	libpassphrase
 	libkeccak
@@ -19,4 +19,3 @@ INSTALL DEPENDENCIES:
 
 	coreutils
 	make
-
