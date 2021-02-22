@@ -4,9 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef WITH_LIBPASSPHRASE
+# include <termios.h>
+#endif
 #include <unistd.h>
 
-#include <passphrase.h>
+#ifdef WITH_LIBPASSPHRASE
+# include <passphrase.h>
+#endif
 #include <libkeccak.h>
 
 #include "config.h"
@@ -53,12 +58,20 @@ static char *argv0;
 static int
 get_passphrase(char **passphrasep)
 {
+#ifndef WITH_LIBPASSPHRASE
+	struct termios stty, stty_saved;
+	char *passphrase = NULL, *new;
+	size_t len = 0, size = 0;
+	ssize_t r;
+#endif
 	int ttyfd;
 	ttyfd = open("/dev/tty", O_RDONLY);
 	if (ttyfd < 0) {
 		perror(argv0);
 		return 2;
 	}
+
+#ifdef WITH_LIBPASSPHRASE
 	passphrase_disable_echo1(ttyfd);
 	fprintf(stderr, "%s", PASSPHRASE_PROMPT_STRING);
 	fflush(stderr);
@@ -68,6 +81,55 @@ get_passphrase(char **passphrasep)
 	passphrase_reenable_echo1(ttyfd);
 	close(ttyfd);
 	return *passphrasep ? 0 : 2;
+
+#else
+	memset(&stty, 0, sizeof(stty));
+	if (tcgetattr(ttyfd, &stty)) {
+		perror(argv0);
+		close(ttyfd);
+		return 2;
+	}
+	memcpy(&stty_saved, &stty, sizeof(stty));
+	stty.c_lflag &= (tcflag_t)~ECHO;
+	tcsetattr(ttyfd, TCSAFLUSH, &stty);
+	fprintf(stderr, "%s", PASSPHRASE_PROMPT_STRING);
+	fflush(stderr);
+
+	for (;;) {
+		if (len == size) {
+			new = realloc(passphrase, size += 32);
+			if (!new) {
+				perror(argv0);
+				close(ttyfd);
+				if (passphrase) {
+					memset(passphrase, 0, len);
+					free(passphrase);
+				}
+				return 2;
+			}
+			passphrase = new;
+		}
+		r = read(ttyfd, &passphrase[len], 1);
+		if (r < 0) {
+			perror(argv0);
+			memset(passphrase, 0, len);
+			free(passphrase);
+			close(ttyfd);
+			return 2;
+		} else if (!r || passphrase[len] == '\n') {
+			passphrase[len] = 0;
+			break;
+		} else {
+			len += 1;
+		}
+	}
+
+	fprintf(stderr, "\n");
+	tcsetattr(ttyfd, TCSAFLUSH, &stty_saved);
+	close(ttyfd);
+	*passphrasep = passphrase;
+	return 0;
+#endif
 }
 
 
@@ -188,7 +250,11 @@ main(int argc, char *argv[])
 		goto fail;
 	if (libkeccak_update(&state, passphrase, strlen(passphrase)))
 		goto pfail;
+#ifdef WITH_LIBPASSPHRASE
 	passphrase_wipe(passphrase, strlen(passphrase));
+#else
+	memset(passphrase, 0, strlen(passphrase));
+#endif
 	free(passphrase);
 	passphrase = NULL;
 
@@ -238,7 +304,11 @@ pfail:
 	perror(*argv);
 fail:
 	if (passphrase) {
+#ifdef WITH_LIBPASSPHRASE
 		passphrase_wipe(passphrase, strlen(passphrase));
+#else
+		memset(passphrase, 0, strlen(passphrase));
+#endif
 		free(passphrase);
 	}
 done:

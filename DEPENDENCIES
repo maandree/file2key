@@ -1,7 +1,7 @@
 RUNTIME DEPENDENCIES:
 
 	libc
-	libpassphrase
+	libpassphrase (opt-in)
 	libkeccak
 
 
@@ -11,7 +11,7 @@ BUILD DEPENDENCIES:
 	make
 	cc
 	libc
-	libpassphrase
+	libpassphrase (opt-in)
 	libkeccak
 
 
