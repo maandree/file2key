@@ -1,13 +1,21 @@
-A simple command that generates a key from a file and a passphrase.
+NAME
+	file2key - generates a key from a file and a passphrase
 
-file2key uses Keccak[] to create a hash as big as a selected file
-and the prints the bitwise exclusive or of the hash and the file
-making a keyfile from any normal file and a passphrase. The idea
-is the reversed of steganography.
+SYNOPSIS
+	file2key [file]
 
-file2key cannot be configured. The idea behind this is that you
-if it required configurations you run the risk of losing all your
-keys if you lose your configurations. This must not happen.
+DESCRIPTION
+	file2key uses Keccak[] to create a hash as big as a
+	selected file and the prints the bitwise exclusive or
+	of the hash and the file making a key file from any
+	normal file and a passphrase.
 
-file2key can also be used to encrypt and decrypt files.
+	The idea is the reversed of steganography.
 
+	file2key can also be used to encrypt and decrypt files.
+
+RATIONALE
+	file2key cannot be configured. The idea behind this is
+	that you if it required configurations you run the risk
+	of losing all your keys if you lose your configurations.
+	This must not happen.
