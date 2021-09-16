@@ -3,6 +3,7 @@
 CONFIGFILE = config.mk
 include $(CONFIGFILE)
 
+
 all: file2key
 
 file2key: file2key.o
@@ -22,6 +23,6 @@ uninstall:
 	-rm -f -- "$(DESTDIR)$(MANPREFIX)/man1/file2key.1"
 
 clean:
-	-rm -rf -- *.o file2key
+	-rm -f -- file2key *.o *.su
 
 .PHONY: all install uninstall clean
