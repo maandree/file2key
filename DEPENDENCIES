@@ -4,16 +4,14 @@ RUNTIME DEPENDENCIES:
 	libpassphrase (opt-in)
 	libkeccak
 
-
 BUILD DEPENDENCIES:
 
 	coreutils
 	make
-	cc
+	c99
 	libc
 	libpassphrase (opt-in)
 	libkeccak
-
 
 INSTALL DEPENDENCIES:
 

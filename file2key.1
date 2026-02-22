@@ -1,4 +1,4 @@
-.TH FILE2KEY 1 file2key
+.TH FILE2KEY 1 FILE2KEY
 
 .SH NAME
 file2key - generates a key from a file and a passphrase
@@ -10,11 +10,11 @@ file2key - generates a key from a file and a passphrase
 .SH DESCRIPTION
 .B file2key
 uses Keccak[] to create a hash as big as a selected
-file and the prints the bitwise exclusive or of the
-hash and the file making a key file from any normal
+file and then prints the bitwise exclusive OR of the
+hash and the file, making a key file from any normal
 file and a passphrase.
 .PP
-The idea is the reversed of steganography.
+The idea is the reverse of steganography.
 .PP
 .B file2key
 can also be used to encrypt and decrypt files.
@@ -37,7 +37,7 @@ The file to generate a key from.
 .SH STDIN
 The
 .B file2key
-utility generate a key from the standard input is no
+utility generates a key from the standard input if no
 .I file
 is specified, or if the specified file is
 .RB \(dq - \(dq.
@@ -46,7 +46,7 @@ is specified, or if the specified file is
 The input file can be any file type.
 
 .SH ENVIRONMENT VARIABLES
-No environment variables affects the execution of
+No environment variables affect the execution of
 .BR file2key
 
 .SH ASYNCHRONOUS EVENTS
@@ -73,7 +73,7 @@ None.
 .SH EXIT STATUS
 If the
 .B file2key
-utility fails it will exit withone of the following statuses:
+utility fails it will exit with one of the following statuses:
 .TP
 0
 Successful completion.
@@ -95,9 +95,9 @@ None.
 
 .SH RATIONALE
 .B file2key
-cannot be configured. The idea behind this is that you
-if it required configurations you run the risk of losing
-all your keys if you lose your configurations. This must
+cannot be configured. The idea behind this is that if
+it required configuration you would run the risk of losing
+all your keys if you lost your configuration. This must
 not happen.
 
 .SH NOTES

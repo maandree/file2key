@@ -5,17 +5,17 @@ SYNOPSIS
 	file2key [file]
 
 DESCRIPTION
-	file2key uses Keccak[] to create a hash as big as a
-	selected file and the prints the bitwise exclusive or
-	of the hash and the file making a key file from any
+	file2key uses Keccak[] to create a hash as big as the
+	selected file and then prints the bitwise exclusive OR
+	of the hash and the file, making a key file from any
 	normal file and a passphrase.
 
-	The idea is the reversed of steganography.
+	The idea is the reverse of steganography.
 
 	file2key can also be used to encrypt and decrypt files.
 
 RATIONALE
 	file2key cannot be configured. The idea behind this is
-	that you if it required configurations you run the risk
-	of losing all your keys if you lose your configurations.
+	that if it required configuration you would run the risk
+	of losing all your keys if you lost your configuration.
 	This must not happen.

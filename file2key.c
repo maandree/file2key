@@ -154,9 +154,9 @@ hash_passphrase(const char *passphrase)
 	spec.output   = PASSPHRASE_KECCAK_OUTPUT;
 
 	if (libkeccak_spec_check(&spec) || PASSPHRASE_KECCAK_SQUEEZES <= 0) {
-		fprintf(stderr, "%s: bad passhprase hashing parameters, please recompile file2key with with "
-		                    "proper values on PASSPHRASE_KECCAK_RATE, PASSPHRASE_KECCAK_CAPACITY, "
-		                    "PASSPHRASE_KECCAK_OUTPUT and PASSPHRASE_KECCAK_SQUEEZES", argv0);
+		fprintf(stderr, "%s: bad passphrase hashing parameters, please recompile file2key with "
+		                    "proper values for PASSPHRASE_KECCAK_RATE, PASSPHRASE_KECCAK_CAPACITY, "
+		                    "PASSPHRASE_KECCAK_OUTPUT and PASSPHRASE_KECCAK_SQUEEZES\n", argv0);
 		return 1;
 	}
 
